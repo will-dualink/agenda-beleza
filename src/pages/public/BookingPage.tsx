@@ -138,6 +138,7 @@ export const BookingPage: React.FC = () => {
 
       const svc = services.find(s => s.id === form.serviceId);
       const prof = professionals.find(p => p.id === form.professionalId);
+      const appointmentId = result.data?.[0]?.id || `apt-${Date.now()}`;
 
       FinanceService.addTransaction({
         id: `trans-${Date.now()}`,
@@ -145,7 +146,7 @@ export const BookingPage: React.FC = () => {
         type: TransactionType.INCOME,
         category: TransactionCategory.SERVICE,
         description: `${svc?.name} com ${prof?.name}`,
-        appointmentId: form.serviceId,
+        appointmentId: appointmentId,
         date: form.date,
       });
 

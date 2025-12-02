@@ -49,34 +49,58 @@ const addAppointmentLocal = (app: Appointment, usePackageId?: string, paymentMet
       throw new Error('Invalid final price amount.');
     }
 
+    // Verificar conflito de horário
     const apps = getAppointments();
+    const services = CatalogService.getServices();
+    const appService = services.find(s => s.id === app.serviceId);
+    if (!appService) throw new Error(`Service ${app.serviceId} not found.`);
+
+    const appointmentDuration = app.customDuration || (appService.durationMinutes + (appService.bufferMinutes || 0));
+    const appointmentStart = timeToMinutes(app.time);
+    const appointmentEnd = appointmentStart + appointmentDuration;
+
+    // Verificar se há conflito com outros agendamentos do mesmo profissional na mesma data
+    const conflictingAppt = apps.find(existingApp => 
+      existingApp.professionalId === app.professionalId &&
+      existingApp.date === app.date &&
+      existingApp.status !== AppointmentStatus.CANCELLED &&
+      existingApp.status !== AppointmentStatus.COMPLETED
+    );
+
+    if (conflictingAppt) {
+      const existingService = services.find(s => s.id === conflictingAppt.serviceId);
+      const existingDuration = conflictingAppt.customDuration || (existingService?.durationMinutes || 60) + (existingService?.bufferMinutes || 0);
+      const existingStart = timeToMinutes(conflictingAppt.time);
+      const existingEnd = existingStart + existingDuration;
+
+      if (!(appointmentEnd <= existingStart || appointmentStart >= existingEnd)) {
+        throw new Error(`Conflict: Professional has another appointment from ${minutesToTime(existingStart)} to ${minutesToTime(existingEnd)}`);
+      }
+    }
+
     apps.push(app);
     saveAppointments(apps);
-
-    const services = CatalogService.getServices();
-    const service = services.find(s => s.id === app.serviceId);
-    if (!service) throw new Error(`Service ${app.serviceId} not found.`);
 
     const txId = generateSecureId();
     
     if (usePackageId) {
       FinanceService.consumePackageItem(usePackageId, app.serviceId);
       FinanceService.addTransaction({
-        id: txId, date: app.date, description: `Uso de Pacote: ${service.name}`, amount: 0, 
+        id: txId, date: app.date, description: `Uso de Pacote: ${appService.name}`, amount: 0, 
         type: TransactionType.INCOME, category: TransactionCategory.PACKAGE_USAGE, appointmentId: app.id, clientPackageId: usePackageId
       });
-      FinanceService.recordCommission(app.professionalId, txId, service.price, app.date);
+      FinanceService.recordCommission(app.professionalId, txId, appService.price, app.date);
     } else {
-      const points = Math.floor(service.price / 10);
-      FinanceService.addLoyaltyPoints(app.clientId, points, txId, `Pontos por serviço: ${service.name}`);
+      const points = Math.floor(appService.price / 10);
+      FinanceService.addLoyaltyPoints(app.clientId, points, txId, `Pontos por serviço: ${appService.name}`);
 
       FinanceService.addTransaction({
-        id: txId, date: app.date, description: `Serviço: ${service.name}`, 
-        amount: finalPrice !== undefined ? finalPrice : service.price, 
+        id: txId, date: app.date, description: `Serviço: ${appService.name}`, 
+        amount: finalPrice !== undefined ? finalPrice : appService.price, 
         type: TransactionType.INCOME, category: TransactionCategory.SERVICE, appointmentId: app.id, paymentMethodId: paymentMethodId
       });
 
-      FinanceService.recordCommission(app.professionalId, txId, finalPrice !== undefined ? finalPrice : service.price, app.date);
+      FinanceService.recordCommission(app.professionalId, txId, finalPrice !== undefined ? finalPrice : appService.price, app.date);
     }
 };
 

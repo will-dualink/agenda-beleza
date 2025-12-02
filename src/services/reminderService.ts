@@ -36,9 +36,6 @@ export const ReminderService = {
       const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
       const remindersToSend = appointments.filter((apt: Appointment) => {
-        // Se já foi enviado lembrete, pula
-        if (apt.reminderSent) return false;
-
         // Se status não é confirmado ou pendente, pula
         if (apt.status !== 'CONFIRMED' && apt.status !== 'PENDING') return false;
 
@@ -84,8 +81,6 @@ export const ReminderService = {
       );
 
       if (success) {
-        // Marca como lembrete enviado (na prática, salvaria no BD)
-        appointment.reminderSent = true;
         logger.info('Lembrete enviado com sucesso', {
           appointmentId: appointment.id,
           clientEmail: appointment.clientEmail,

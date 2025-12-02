@@ -3,7 +3,7 @@
  * Visão geral e gerenciamento centralizado do salão
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Calendar,
   Users,
@@ -25,12 +25,21 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'calendar' | 'clients' | 'settings'>('calendar');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchClient, setSearchClient] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Força re-render a cada 30 segundos para sincronizar dados
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Dados
-  const appointments = useMemo(() => AppointmentService.getAppointments(), []);
-  const professionals = useMemo(() => CatalogService.getProfessionals(), []);
-  const services = useMemo(() => CatalogService.getServices(), []);
-  const transactions = useMemo(() => FinanceService.getTransactions(), []);
+  const appointments = useMemo(() => AppointmentService.getAppointments(), [refreshKey]);
+  const professionals = useMemo(() => CatalogService.getProfessionals(), [refreshKey]);
+  const services = useMemo(() => CatalogService.getServices(), [refreshKey]);
+  const transactions = useMemo(() => FinanceService.getTransactions(), [refreshKey]);
 
   // Filtros
   const todayAppointments = useMemo(() => {
