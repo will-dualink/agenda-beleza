@@ -121,7 +121,7 @@ export const AppointmentService = {
 
     try {
       await retryWithBackoff(async () => {
-        const { data, error } = await supabase.from('appointments').select('*').eq('date', dateStr);
+        const { data, error } = await supabase.from('appointments').select('*').eq('appointment_date', dateStr);
         if (error) throw error;
         if (data) {
             const fetchedApps: Appointment[] = data.map((a: any) => ({
@@ -130,10 +130,10 @@ export const AppointmentService = {
                 clientName: 'Cliente (Sync)', 
                 professionalId: a.professional_id,
                 serviceId: a.service_id,
-                date: a.date,
-                time: a.time.substring(0, 5),
+                date: a.appointment_date,
+                time: a.appointment_time.substring(0, 5),
                 status: a.status as AppointmentStatus,
-                notes: ''
+                notes: a.notes || ''
             }));
             const currentApps = getAppointments();
             const otherApps = currentApps.filter(a => a.date !== dateStr);
@@ -324,18 +324,25 @@ export const AppointmentService = {
        }
 
        try {
+          console.log('Attempting Supabase insert...');
           const result = await retryWithBackoff(async () => {
-            return await supabase.from('appointments').insert([{
+            const query = supabase.from('appointments');
+            console.log('Query object:', query);
+            if (!query || !query.insert) {
+              throw new Error('Supabase from() returned invalid object');
+            }
+            return await query.insert([{
                client_id: app.clientId,
                professional_id: app.professionalId,
                service_id: app.serviceId,
                date: app.date,
                time: app.time,
-               status: 'PENDING'
+               status: app.status || 'scheduled'
             }]).select();
           }, 2, 500);
 
-          const { data, error } = result;
+          console.log('Supabase result:', result);
+          const { data, error } = result || {};
           if (error) throw error;
           
           try {

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AgendaBeleza</string>
+    <string name="title_activity_main">AgendaBeleza</string>
+    <string name="package_name">com.agendabeleza.app</string>
+    <string name="custom_url_scheme">com.agendabeleza.app</string>
+</resources>

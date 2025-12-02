@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Mail, AlertCircle, Loader, ArrowLeft } from 'lucide-react';
+import { Role } from '../../types';
 
 interface LoginClientProps {
   onLoginSuccess: (user: any) => void;
@@ -18,14 +19,15 @@ export const LoginClient: React.FC<LoginClientProps> = ({ onLoginSuccess, onBack
     setLoading(true);
 
     try {
-      // Simulação de autenticação cliente
+      // Criar cliente temporário para agendamento
       if (email && name) {
         const clientUser = {
           id: `client-${Date.now()}`,
           name: name,
           email: email,
-          role: 'client',
+          role: Role.CLIENT, // Usar enum correto
           phone: '',
+          loyaltyPoints: 0
         };
         onLoginSuccess(clientUser);
       } else {

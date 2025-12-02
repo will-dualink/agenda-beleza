@@ -81,13 +81,13 @@ export const AuthChoice: React.FC<AuthChoiceProps> = ({ onAdminClick, onClientCl
                 </div>
               </div>
 
-              {/* CTA Button */}
-              <button className="w-full py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-purple-300/50 transition-all duration-300 text-lg group/btn overflow-hidden relative">
+              {/* CTA Visual */}
+              <div className="w-full py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 text-white font-semibold rounded-2xl hover:shadow-lg hover:shadow-purple-300/50 transition-all duration-300 text-lg group/btn overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-700 via-pink-700 to-rose-700 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative flex items-center justify-center gap-2">
                   Agendar Agora <span className="text-xl">→</span>
                 </span>
-              </button>
+              </div>
             </div>
           </button>
         </div>
