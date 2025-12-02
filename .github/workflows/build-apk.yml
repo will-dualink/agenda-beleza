@@ -1,8 +1,6 @@
 name: Build Android APK
 
 on:
-  push:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -18,14 +16,30 @@ jobs:
         with:
           node-version: '18'
       
+      - name: Verificar arquivos
+        run: |
+          echo "📁 Arquivos no projeto:"
+          ls -la
+          echo ""
+          echo "📦 package.json:"
+          cat package.json
+      
       - name: Instalar dependências
-        run: npm install
+        run: |
+          echo "📥 Instalando dependências..."
+          npm install
+          echo "✅ Dependências instaladas"
       
       - name: Build aplicação web
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://asouobyyuxsiemlppjlj.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzb3VvYnl5dXhzaWVtbHBwamxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzg3NzYsImV4cCI6MjA3OTc1NDc3Nn0.CN-50KUWEzYGD-RJqe_n1U9JD1GDYVU6QaRyia1R4n0' }}
+      
+      - name: Verificar build
+        run: |
+          echo "📦 Verificando build:"
+          ls -la dist/
       
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -40,7 +54,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon --stacktrace
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
