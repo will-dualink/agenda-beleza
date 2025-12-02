@@ -40,11 +40,20 @@ jobs:
           echo ""
           echo "📦 Verificando node_modules:"
           ls -la node_modules/@capacitor/ 2>&1 || echo "❌ @capacitor não encontrado"
+          echo ""
+          echo "🔍 Verificando Vite:"
+          ls -la node_modules/.bin/vite 2>&1 || echo "❌ Vite não encontrado"
+          ls -la node_modules/vite/ 2>&1 | head -10 || echo "❌ Pasta vite não encontrada"
       
       - name: Build aplicação web
         run: |
           echo "🔨 Buildando aplicação..."
-          npx vite build
+          echo "📍 PATH atual: $PATH"
+          echo "📍 Verificando executável vite:"
+          which vite || echo "vite não está no PATH"
+          echo ""
+          echo "🔧 Usando caminho completo do Vite:"
+          ./node_modules/.bin/vite build || node node_modules/vite/bin/vite.js build
         env:
           VITE_SUPABASE_URL: https://asouobyyuxsiemlppjlj.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzb3VvYnl5dXhzaWVtbHBwamxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzg3NzYsImV4cCI6MjA3OTc1NDc3Nn0.CN-50KUWEzYGD-RJqe_n1U9JD1GDYVU6QaRyia1R4n0
