@@ -44,7 +44,7 @@ jobs:
       - name: Build aplicação web
         run: |
           echo "🔨 Buildando aplicação..."
-          npm run build
+          npx vite build
         env:
           VITE_SUPABASE_URL: https://asouobyyuxsiemlppjlj.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzb3VvYnl5dXhzaWVtbHBwamxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzg3NzYsImV4cCI6MjA3OTc1NDc3Nn0.CN-50KUWEzYGD-RJqe_n1U9JD1GDYVU6QaRyia1R4n0
