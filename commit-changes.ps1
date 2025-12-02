@@ -30,6 +30,6 @@ try {
     Write-Host "Últimos commits:"
     git --no-pager log -n 5 --oneline
 } catch {
-    Write-Host "Ocorreu um erro durante a execução: " $_.Exception.Message -ForegroundColor Red
+    Write-Host "Ocorreu um erro durante a execução: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
