@@ -181,51 +181,77 @@ export const BookingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">Agende seu Serviço</h1>
-          <p className="text-gray-600 mt-2">Escolha o serviço e horário que melhor se adequa a você</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
+      {/* Premium Header */}
+      <div className="bg-white/80 backdrop-blur-md border-b border-purple-100/50 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <h1 className="text-4xl font-light text-gray-900">
+            Seu <span className="font-semibold bg-gradient-to-r from-purple-600 to-rose-600 bg-clip-text text-transparent">Momento Premium</span>
+          </h1>
+          <p className="text-gray-600 mt-2 font-light">Agende com elegância. Escolha a melhor experiência.</p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 py-12">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-red-800">{error}</p>
+            <p className="text-red-800 font-light">{error}</p>
           </div>
         )}
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        {/* Progress Indicator - Premium */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between relative">
             {(['service', 'date', 'professional', 'checkout', 'confirmation'] as BookingStep[]).map((s, idx) => (
               <React.Fragment key={s}>
                 <button
                   onClick={() => { if (step === 'checkout' && s !== 'checkout') setStep(s); }}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold transition ${step === s ? 'bg-purple-600 text-white' : step.localeCompare(s) > 0 ? 'bg-purple-200 text-purple-800' : 'bg-gray-200 text-gray-600'}`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${step === s ? 'bg-gradient-to-br from-purple-600 to-rose-600 text-white shadow-lg' : step.localeCompare(s) > 0 ? 'bg-purple-200/50 text-purple-700' : 'bg-gray-200 text-gray-600'}`}
                 >
                   {step.localeCompare(s) > 0 ? <Check className="w-5 h-5" /> : idx + 1}
                 </button>
-                {idx < 4 && <div className={`flex-1 h-1 mx-2 transition ${step.localeCompare(s) > 0 ? 'bg-purple-200' : 'bg-gray-200'}`} />}
+                {idx < 4 && (
+                  <div className={`flex-1 h-1 mx-2 transition-all duration-300 ${step.localeCompare(s) > 0 ? 'bg-gradient-to-r from-purple-200 to-pink-200' : 'bg-gray-200'}`} />
+                )}
               </React.Fragment>
             ))}
           </div>
         </div>
 
         {step === 'service' && (
-          <div className="grid md:grid-cols-2 gap-4">
-            {services.map(svc => (
-              <button key={svc.id} onClick={() => handleServiceSelect(svc.id)} className={`p-6 rounded-lg border-2 transition cursor-pointer text-left ${form.serviceId === svc.id ? 'border-purple-600 bg-purple-50' : 'border-gray-200 bg-white hover:border-purple-300'}`}>
-                <img src={svc.imageUrl || `https://picsum.photos/300/200?random=${svc.id}`} alt={svc.name} className="w-full h-40 object-cover rounded mb-3" />
-                <h3 className="font-semibold text-gray-900">{svc.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{svc.description}</p>
-                <div className="flex justify-between items-center mt-4 pt-4 border-t">
-                  <span className="text-xs text-gray-500">{svc.durationMinutes} min</span>
-                  <span className="font-bold text-purple-600">{masks.currency(svc.price)}</span>
-                </div>
-              </button>
-            ))}
+          <div>
+            <h2 className="text-3xl font-light text-gray-900 mb-8">Escolha seu <span className="font-semibold bg-gradient-to-r from-purple-600 to-rose-600 bg-clip-text text-transparent">Serviço</span></h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {services.map(svc => (
+                <button key={svc.id} onClick={() => handleServiceSelect(svc.id)} className={`group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer text-left ${form.serviceId === svc.id ? 'ring-2 ring-purple-500 shadow-2xl' : 'hover:shadow-xl'}`}>
+                  {/* Card Background */}
+                  <div className={`relative h-56 md:h-64 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 ${form.serviceId === svc.id ? 'ring-2 ring-inset ring-purple-400' : ''}`}>
+                    <img src={svc.imageUrl || `https://picsum.photos/400/300?random=${svc.id}`} alt={svc.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+                    {/* Price Badge */}
+                    <div className="absolute top-4 right-4">
+                      <span className="inline-block px-4 py-2 bg-white/95 backdrop-blur text-purple-600 font-semibold rounded-full text-lg shadow-lg">
+                        {masks.currency(svc.price)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className={`p-6 ${form.serviceId === svc.id ? 'bg-gradient-to-br from-purple-50 to-pink-50' : 'bg-white'}`}>
+                    <h3 className="font-semibold text-xl text-gray-900 mb-2">{svc.name}</h3>
+                    <p className="text-sm text-gray-600 font-light mb-4 line-clamp-2">{svc.description}</p>
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                      <span className="text-xs text-gray-500 font-light">⏱ {svc.durationMinutes} minutos</span>
+                      <span className={`text-sm font-semibold transition-colors ${form.serviceId === svc.id ? 'text-purple-600' : 'text-purple-400 group-hover:text-purple-600'}`}>
+                        Selecionar →
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
