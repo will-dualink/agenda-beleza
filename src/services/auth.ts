@@ -51,6 +51,14 @@ export const AuthService = {
     return secureStor.get('current_user', null);
   },
 
+  setCurrentUser: (user: ClientProfile) => {
+    secureStor.set('current_user', user);
+  },
+
+  clearCurrentUser: () => {
+    secureStor.remove('current_user');
+  },
+
   login: async (loginInput: string, passwordInput: string): Promise<{ success: boolean, user?: ClientProfile, message?: string }> => {
     // Rate limiting
     const loginLimiter = new RateLimiter(300000, 5); // 5 attempts in 5 minutes

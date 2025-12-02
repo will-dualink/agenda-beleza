@@ -25,11 +25,14 @@ export const useAuth = () => {
   const login = (user: ClientProfile) => {
     setUser(user);
     setIsLoggedIn(true);
+    // Opcionalmente salvar no localStorage
+    AuthService.setCurrentUser(user);
   };
 
   const logout = () => {
     setUser(null);
     setIsLoggedIn(false);
+    AuthService.clearCurrentUser();
   };
 
   return {
