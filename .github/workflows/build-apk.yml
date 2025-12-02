@@ -6,40 +6,54 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
+      
+      - name: Listar arquivos do projeto
+        run: |
+          echo "📁 Estrutura do projeto:"
+          ls -la
+          echo ""
+          echo "📦 Conteúdo do package.json:"
+          cat package.json | head -30
+          echo ""
+          echo "🤖 Verificando pasta android:"
+          ls -la android/ | head -20
       
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
       
-      - name: Verificar arquivos
-        run: |
-          echo "📁 Arquivos no projeto:"
-          ls -la
-          echo ""
-          echo "📦 package.json:"
-          cat package.json
+      - name: Limpar cache npm
+        run: npm cache clean --force
       
-      - name: Instalar dependências
+      - name: Instalar dependências (com verbose)
         run: |
           echo "📥 Instalando dependências..."
-          npm install
-          echo "✅ Dependências instaladas"
+          npm install --verbose 2>&1 | tail -50
+          echo ""
+          echo "✅ Instalação concluída!"
+          echo ""
+          echo "📦 Verificando node_modules:"
+          ls -la node_modules/@capacitor/ 2>&1 || echo "❌ @capacitor não encontrado"
       
       - name: Build aplicação web
-        run: npm run build
+        run: |
+          echo "🔨 Buildando aplicação..."
+          npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://asouobyyuxsiemlppjlj.supabase.co' }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzb3VvYnl5dXhzaWVtbHBwamxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzg3NzYsImV4cCI6MjA3OTc1NDc3Nn0.CN-50KUWEzYGD-RJqe_n1U9JD1GDYVU6QaRyia1R4n0' }}
+          VITE_SUPABASE_URL: https://asouobyyuxsiemlppjlj.supabase.co
+          VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzb3VvYnl5dXhzaWVtbHBwamxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzg3NzYsImV4cCI6MjA3OTc1NDc3Nn0.CN-50KUWEzYGD-RJqe_n1U9JD1GDYVU6QaRyia1R4n0
       
       - name: Verificar build
         run: |
-          echo "📦 Verificando build:"
+          echo "📦 Arquivos gerados:"
           ls -la dist/
+          du -sh dist/
       
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -47,18 +61,41 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       
+      - name: Verificar Java
+        run: |
+          java -version
+          echo "JAVA_HOME: $JAVA_HOME"
+      
       - name: Sincronizar Capacitor
-        run: npx cap sync android
+        run: |
+          echo "🔄 Sincronizando Capacitor..."
+          npx cap sync android --verbose
+      
+      - name: Verificar arquivos Android
+        run: |
+          echo "📱 Estrutura android/:"
+          ls -la android/
+          echo ""
+          echo "🔧 Verificando gradlew:"
+          ls -la android/gradlew
+          file android/gradlew
       
       - name: Build APK com Gradle
         run: |
           cd android
+          echo "🔨 Dando permissão ao gradlew..."
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          echo "🔨 Buildando APK..."
+          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tail -100
+      
+      - name: Verificar APK gerado
+        run: |
+          echo "📦 Procurando APK:"
+          find android -name "*.apk" -type f
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android/app/build/outputs/apk/release/*.apk
           retention-days: 30
